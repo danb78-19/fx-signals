@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FX Signals">
+<meta name="theme-color" content="#070c15">
+<title>⚡ FX Signals</title>
+<style>
+:root{--g:#00e5b0;--r:#ff3d5a;--a:#f59e0b;--b:#60a5fa;--p:#a78bfa;--bg:#070c15;--bg2:#080f1c;--bg3:#0c1422;--br:#1a2235;--tx:#e2e8f0;--mu:#64748b;--di:#374151}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg)}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;padding-bottom:env(safe-area-inset-bottom)}
+.app{max-width:480px;margin:0 auto}
+.hdr{background:var(--bg2);border-bottom:1px solid var(--br);padding:calc(env(safe-area-inset-top,0px) + 14px) 16px 12px;position:sticky;top:0;z-index:99}
+.hdr1{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.htitle{font-family:'SF Mono',monospace;font-size:16px;font-weight:800;letter-spacing:2px;color:#f1f5f9}
+.hsub{font-size:9px;color:var(--di);letter-spacing:1px;margin-top:2px}
+.hright{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.dlive{display:flex;align-items:center;gap:5px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--g);animation:pulse 2s infinite}
+.dot.amber{background:var(--a)}.dot.red{background:var(--r)}
+.ltxt{font-family:monospace;font-size:10px}
+.lupd{font-size:9px;color:var(--di)}
+.srow{display:flex;gap:20px;align-items:flex-end;margin-bottom:10px}
+.sl{font-size:8px;color:var(--di);letter-spacing:1px}
+.sv{font-family:monospace;font-size:20px;font-weight:800;line-height:1}
+.sbtn{width:100%;padding:14px;border:none;border-radius:13px;font-family:'SF Mono',monospace;font-size:13px;font-weight:800;letter-spacing:1.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px}
+.sbtn.ready{background:linear-gradient(135deg,var(--g),#0066ff);color:#fff}
+.sbtn.busy{background:#1a2235;color:var(--mu);cursor:not-allowed}
+.tabs{display:flex;background:var(--bg2);border-bottom:1px solid var(--br)}
+.tab{flex:1;padding:12px 0;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--di);font-family:monospace;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:color .2s,border-color .2s}
+.tab.on{color:var(--g);border-bottom-color:var(--g)}
+.content{padding:14px 14px 80px}
+.panel{display:none}.panel.on{display:block}
+/* setup */
+.sbox{background:var(--bg3);border:1px solid var(--br);border-radius:14px;padding:20px 16px;margin-bottom:16px}
+.stitle{font-size:13px;font-weight:700;color:#f1f5f9;margin-bottom:6px}
+.sbody{font-size:11px;color:var(--mu);line-height:1.7;margin-bottom:12px}
+.ainput{width:100%;padding:11px 14px;background:#070d18;border:1px solid var(--br);border-radius:10px;color:#f1f5f9;font-family:monospace;font-size:12px;outline:none;margin-bottom:10px}
+.ainput:focus{border-color:var(--g)}
+.svbtn{width:100%;padding:12px;background:var(--g);border:none;border-radius:10px;color:#000;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit}
+.ksaved{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--g);margin-bottom:10px}
+.chkey{font-size:10px;color:var(--di);cursor:pointer;text-decoration:underline}
+/* banners */
+.errbanner{background:#ff3d5a0c;border:1px solid #ff3d5a30;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:11px;color:#f87171;line-height:1.5}
+.infobanner{background:var(--bg3);border-left:3px solid var(--g);border-radius:0 10px 10px 0;padding:10px 14px;margin-bottom:14px;font-size:11px;color:var(--mu);line-height:1.6}
+.infobanner b{color:var(--g)}
+/* welcome */
+.welcome{text-align:center;padding:40px 16px}
+.wicon{font-size:52px;margin-bottom:16px}
+.wtitle{font-family:monospace;font-size:18px;font-weight:800;color:#f1f5f9;margin-bottom:10px}
+.wbody{font-size:13px;color:var(--mu);line-height:1.8}
+.wnote{font-size:11px;color:var(--di);margin-top:8px;line-height:1.7}
+/* cards */
+.card{background:linear-gradient(160deg,#0c1422,#111827);border:1px solid var(--br);border-radius:16px;padding:16px;margin-bottom:12px;transition:border-color .3s}
+.card.buy{border-color:#00e5b030}.card.sell{border-color:#ff3d5a30}
+.chdr{display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none}
+.prow{display:flex;align-items:center;gap:10px}
+.flag{font-size:22px;line-height:1}
+.pname{font-family:monospace;font-size:17px;font-weight:800;color:#f1f5f9}
+.pprice{font-family:monospace;font-size:12px;color:var(--mu);margin-top:2px}
+.sbadge{display:inline-block;padding:5px 14px;border-radius:20px;font-family:monospace;font-size:12px;font-weight:800;letter-spacing:2px;border:1px solid}
+.clbl{font-size:9px;letter-spacing:1px;margin-top:4px;text-align:right}
+.chev{font-size:10px;color:var(--di);display:inline-block;margin-left:5px;transition:transform .2s}
+.chev.open{transform:rotate(180deg)}
+.qrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.chip{background:#070d18;border-radius:6px;padding:4px 9px;font-size:10px}
+.cl{color:var(--di)}.cv{font-family:monospace;font-weight:700}
+.nbox{background:#070d18;border-radius:8px;padding:8px 12px;font-size:11px;color:var(--mu);line-height:1.5;margin-top:10px}
+.detail{display:none;margin-top:14px}.detail.open{display:block}
+.scrow{display:flex;gap:14px;align-items:center;margin-bottom:14px}
+.bcol{flex:1}
+.brow{margin-bottom:6px}
+.blrow{display:flex;justify-content:space-between;font-size:10px;margin-bottom:2px}
+.btrack{height:3px;background:#0a1120;border-radius:2px;overflow:hidden}
+.bfill{height:100%;border-radius:2px}
+.pboxes{display:flex;gap:6px;margin-bottom:10px}
+.pbox{background:#070d18;border-radius:8px;padding:8px 4px;text-align:center;flex:1}
+.pbl{font-size:8px;color:var(--di);letter-spacing:1px;margin-bottom:3px}
+.pbv{font-family:monospace;font-size:10px;font-weight:700;line-height:1.3;word-break:break-all}
+.crow{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.sectitle{font-size:9px;color:var(--di);letter-spacing:2px;margin-bottom:6px}
+.driver{display:flex;gap:7px;font-size:11px;color:var(--mu);margin-bottom:4px;line-height:1.4}
+.ddot{flex-shrink:0;margin-top:1px}
+.nfrow{display:flex;justify-content:space-between;gap:8px;margin-bottom:4px}
+.nftxt{font-size:10px;color:var(--mu);flex:1;line-height:1.4}
+.nfscore{font-size:10px;font-weight:700;flex-shrink:0}
+.sumbox{border-radius:10px;padding:10px 12px;font-size:11px;color:#94a3b8;line-height:1.65;margin-bottom:10px}
+.riskbox{background:#ff3d5a07;border:1px solid #ff3d5a18;border-radius:8px;padding:8px 10px;margin-bottom:10px}
+.riskrow{font-size:10px;color:var(--mu);margin-bottom:2px}
+.collbtn{width:100%;padding:9px;background:transparent;border-radius:8px;font-size:11px;cursor:pointer;font-family:inherit;border:1px solid}
+.spin{width:16px;height:16px;border:2px solid #1e293b;border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+.spin.amber{border-top-color:var(--a)}
+.lcrd{background:linear-gradient(160deg,#0c1422,#111827);border:1px solid var(--br);border-radius:16px;padding:16px;margin-bottom:12px}
+.lhdr{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.lbars{display:flex;flex-direction:column;gap:6px}
+.lbar{height:8px;background:#1e293b;border-radius:4px;animation:shimmer 1.4s ease-in-out infinite}
+/* news */
+.ovtheme{background:var(--bg3);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:#94a3b8;border-left:3px solid var(--a);line-height:1.7}
+.ovtheme b{color:var(--a)}
+.evrow{display:flex;gap:10px;align-items:center;padding:8px 12px;background:var(--bg3);border-radius:8px;margin-bottom:6px}
+.evday{font-family:monospace;font-size:11px;color:var(--g);width:32px;flex-shrink:0}
+.evname{font-size:12px;color:#cbd5e1;font-weight:600}
+.evpairs{font-size:10px;color:var(--mu)}
+.evimp{font-size:10px;font-weight:700;flex-shrink:0}
+.ncrd{background:var(--bg3);border-radius:10px;padding:10px 12px;margin-bottom:8px;border-left:3px solid}
+.nmeta{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.ncat{font-size:10px;color:var(--mu)}
+.neff{font-size:9px;font-weight:700}
+.nhl{font-size:12px;color:#cbd5e1;font-weight:600;line-height:1.4}
+.ndetail{font-size:10px;color:var(--mu);line-height:1.5;margin-top:3px}
+.footer{font-size:10px;color:#1e293b;text-align:center;padding:8px 0;line-height:1.7}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes shimmer{0%,100%{opacity:.4}50%{opacity:.8}}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="hdr">
+  <div class="hdr1">
+    <div><div class="htitle">⚡ FX SIGNALS</div><div class="hsub" id="hdate">AI-POWERED · LIVE · P≥60%</div></div>
+    <div class="hright">
+      <div class="dlive"><div class="dot" id="sdot"></div><span class="ltxt" id="stxt" style="color:var(--g)">READY</span></div>
+      <div class="lupd" id="lupd"></div>
+    </div>
+  </div>
+  <div class="srow" id="srow" style="display:none">
+    <div><div class="sl">BUY</div><div class="sv" style="color:var(--g)" id="sbuy">0</div></div>
+    <div><div class="sl">SELL</div><div class="sv" style="color:var(--r)" id="ssell">0</div></div>
+    <div><div class="sl">NEUTRAL</div><div class="sv" style="color:var(--mu)" id="sneut">0</div></div>
+    <div style="margin-left:auto;text-align:right"><div class="sl">MIN PROB</div><div class="sv" style="color:var(--a)">60%</div></div>
+  </div>
+  <button class="sbtn ready" id="scanbtn" onclick="scanAll()">⚡ GET LIVE SIGNALS NOW</button>
+</div>
+<div class="tabs">
+  <button class="tab on" onclick="showTab('signals',this)">⚡ SIGNALS</button>
+  <button class="tab" onclick="showTab('news',this)">🌐 NEWS</button>
+  <button class="tab" onclick="showTab('setup',this)">⚙ SETUP</button>
+</div>
+<div class="content">
+  <!-- SIGNALS -->
+  <div id="panel-signals" class="panel on">
+    <div id="welcome">
+      <div class="sbox" id="apicard">
+        <div class="stitle">🔑 Enter your API Key</div>
+        <div class="sbody">Get a free key at <b>console.anthropic.com</b> → API Keys → Create Key.<br>Saved only on this device.</div>
+        <div id="kdisp"></div>
+        <input class="ainput" id="keyinput" type="password" placeholder="sk-ant-api03-..." oninput="onki()">
+        <button class="svbtn" id="savebtn" onclick="saveKey()">Save API Key</button>
+      </div>
+      <div class="welcome">
+        <div class="wicon">⚡</div>
+        <div class="wtitle">READY TO SCAN</div>
+        <div class="wbody">Tap <b style="color:var(--g)">GET LIVE SIGNALS NOW</b> above.<br>Claude analyses all 8 major pairs and generates signals with ≥60% win probability.</div>
+        <div class="wnote">Takes ~30–60 seconds for all 8 pairs.</div>
+      </div>
+    </div>
+    <div id="cards"></div>
+  </div>
+  <!-- NEWS -->
+  <div id="panel-news" class="panel">
+    <div id="newsbody"><div style="color:var(--di);text-align:center;padding:40px 0;font-size:13px">Tap <b style="color:var(--g)">GET LIVE SIGNALS NOW</b> to load market news.</div></div>
+  </div>
+  <!-- SETUP -->
+  <div id="panel-setup" class="panel">
+    <div class="sbox">
+      <div class="stitle">🔑 Claude API Key</div>
+      <div class="sbody">Get free at: <b>console.anthropic.com</b><br>→ Sign up → API Keys → Create Key<br>Key starts with <b>sk-ant-api03-...</b></div>
+      <div id="skdisp"></div>
+      <input class="ainput" id="skeyinput" type="password" placeholder="sk-ant-api03-...">
+      <button class="svbtn" onclick="saveKeySetup()">Save API Key</button>
+    </div>
+    <div class="sbox">
+      <div class="stitle">ℹ️ How It Works</div>
+      <div class="sbody">1. Tap <b>GET LIVE SIGNALS NOW</b><br>2. Claude AI analyses all 8 FX pairs<br>3. BUY/SELL only shown at ≥60% probability<br>4. Each signal includes Entry, SL, TP and R:R<br>5. Tap any card to expand full analysis<br><br><b>Refresh</b> any time by tapping the button again.</div>
+    </div>
+    <div class="sbox">
+      <div class="stitle">⚠️ Risk Disclaimer</div>
+      <div class="sbody" style="color:#f87171">For informational purposes only. Not financial advice. Forex trading involves significant risk of loss. Always use proper risk management.</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+const PAIRS=[{symbol:"EUR/USD",flag:"🇪🇺🇺🇸"},{symbol:"GBP/USD",flag:"🇬🇧🇺🇸"},{symbol:"USD/JPY",flag:"🇺🇸🇯🇵"},{symbol:"AUD/USD",flag:"🇦🇺🇺🇸"},{symbol:"USD/CAD",flag:"🇺🇸🇨🇦"},{symbol:"USD/CHF",flag:"🇺🇸🇨🇭"},{symbol:"NZD/USD",flag:"🇳🇿🇺🇸"},{symbol:"EUR/GBP",flag:"🇪🇺🇬🇧"}];
+let apiKey=localStorage.getItem("fx_key")||"";
+let sigs={};
+let scanning=false;
+
+window.onload=()=>{setDate();renderKey();if(apiKey)hideApiCard()};
+
+function setDate(){
+  document.getElementById("hdate").textContent=new Date().toLocaleString("en-GB",{weekday:"short",day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
+}
+function showTab(n,b){
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("on"));
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("on"));
+  document.getElementById("panel-"+n).classList.add("on");
+  b.classList.add("on");
+}
+function onki(){
+  const v=document.getElementById("keyinput").value.trim();
+  document.getElementById("savebtn").style.opacity=v.startsWith("sk-")?"1":"0.5";
+}
+function saveKey(){
+  const v=document.getElementById("keyinput").value.trim();
+  if(!v.startsWith("sk-")){alert("Key must start with sk-ant-api03-...");return}
+  apiKey=v;localStorage.setItem("fx_key",v);renderKey();hideApiCard();
+}
+function saveKeySetup(){
+  const v=document.getElementById("skeyinput").value.trim();
+  if(!v.startsWith("sk-")){alert("Key must start with sk-ant-api03-...");return}
+  apiKey=v;localStorage.setItem("fx_key",v);renderSetupKey();alert("✅ API Key saved!");
+}
+function renderKey(){
+  const d=document.getElementById("kdisp");
+  if(apiKey){
+    d.innerHTML=`<div class="ksaved">✅ Key saved: ${apiKey.slice(0,16)}… <span class="chkey" onclick="clearKey()">change</span></div>`;
+    document.getElementById("keyinput").style.display="none";
+    document.getElementById("savebtn").style.display="none";
+  }else{
+    d.innerHTML="";
+    document.getElementById("keyinput").style.display="block";
+    document.getElementById("savebtn").style.display="block";
+  }
+  renderSetupKey();
+}
+function renderSetupKey(){
+  const d=document.getElementById("skdisp");if(!d)return;
+  if(apiKey){
+    d.innerHTML=`<div class="ksaved">✅ Active: ${apiKey.slice(0,16)}… <span class="chkey" onclick="clearKey()">remove</span></div>`;
+    document.getElementById("skeyinput").style.display="none";
+  }else{d.innerHTML="";document.getElementById("skeyinput").style.display="block"}
+}
+function clearKey(){apiKey="";localStorage.removeItem("fx_key");renderKey();document.getElementById("apicard").style.display="block"}
+function hideApiCard(){document.getElementById("apicard").style.display="none"}
+
+// ── THE FIXED CLAUDE CALL ──────────────────────────────────────────────────────
+// Key fixes:
+// 1. Uses system prompt to enforce JSON-only output
+// 2. No web_search tools (they cause tool_use loops that break parsing)  
+// 3. Extracts JSON using multiple fallback strategies
+async function callClaude(userPrompt, systemPrompt) {
+  const body = {
+    model: "claude-sonnet-4-20250514",
+    max_tokens: 1000,
+    system: systemPrompt,
+    messages: [{ role: "user", content: userPrompt }]
+  };
+
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true"
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!res.ok) {
+    const txt = await res.text();
+    let msg = `API error ${res.status}`;
+    try { const j = JSON.parse(txt); msg = j.error?.message || msg; } catch(e) {}
+    throw new Error(msg);
+  }
+
+  const data = await res.json();
+  const text = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("");
+  if (!text) throw new Error("Empty response from API");
+  return text;
+}
+
+function extractJSON(raw) {
+  if (!raw) throw new Error("No response text");
+  
+  // Strategy 1: direct parse of trimmed text
+  const t = raw.trim();
+  try { return JSON.parse(t); } catch(e) {}
+  
+  // Strategy 2: strip markdown fences then parse
+  const stripped = t.replace(/^```(?:json)?\s*/i,"").replace(/\s*```$/,"").trim();
+  try { return JSON.parse(stripped); } catch(e) {}
+  
+  // Strategy 3: find outermost { } 
+  const first = t.indexOf("{");
+  const last  = t.lastIndexOf("}");
+  if (first >= 0 && last > first) {
+    try { return JSON.parse(t.slice(first, last + 1)); } catch(e) {}
+  }
+  
+  // Strategy 4: regex find JSON object
+  const m = t.match(/\{[\s\S]{20,}\}/);
+  if (m) { try { return JSON.parse(m[0]); } catch(e) {} }
+  
+  throw new Error("Could not extract JSON. Response was: " + t.slice(0, 80));
+}
+
+// ── PROMPTS ────────────────────────────────────────────────────────────────────
+const SIGNAL_SYSTEM = `You are a professional forex analyst. You MUST respond with ONLY a valid JSON object and absolutely nothing else — no explanation, no markdown, no code fences, no text before or after the JSON. Your entire response must be parseable by JSON.parse().`;
+
+function signalPrompt(sym) {
+  const now = new Date().toLocaleString("en-GB",{weekday:"long",year:"numeric",month:"long",day:"numeric",hour:"2-digit",minute:"2-digit"});
+  return `Today: ${now}. Analyse ${sym} and return a trading signal.
+
+Rules:
+- signal must be "BUY", "SELL", or "NEUTRAL"  
+- Only use BUY or SELL if probability >= 60
+- All prices must be realistic for current ${sym} levels
+- Minimum 1.5:1 reward to risk ratio
+
+Return this exact JSON structure (fill in real values):
+{"pair":"${sym}","price":"0.00","signal":"NEUTRAL","probability":55,"confidence":"MEDIUM","entry":"0.00","stopLoss":"0.00","takeProfit":"0.00","riskReward":"1:1.5","pips_sl":30,"pips_tp":45,"timeframe":"4H","trend":"RANGING","technicalScore":55,"fundamentalScore":55,"sentimentScore":55,"newsImpact":55,"support":"0.00","resistance":"0.00","drivers":["driver1","driver2","driver3"],"risks":["risk1","risk2"],"news":[{"headline":"factor1","effect":"NEUTRAL","score":5}],"summary":"Two sentence explanation."}`;
+}
+
+const NEWS_SYSTEM = `You are a forex market analyst. You MUST respond with ONLY a valid JSON object and absolutely nothing else — no explanation, no markdown, no code fences. Your entire response must be parseable by JSON.parse().`;
+
+function newsPrompt() {
+  const now = new Date().toLocaleString("en-GB",{weekday:"long",year:"numeric",month:"long",day:"numeric",hour:"2-digit",minute:"2-digit"});
+  return `Today: ${now}. Provide a current forex market overview.
+
+Return this exact JSON structure:
+{"sentiment":"MIXED","theme":"One sentence on the main FX driver this week.","events":[{"day":"Mon","event":"Event name","impact":"HIGH","pairs":"EUR/USD"}],"news":[{"category":"Central Bank","headline":"Headline","detail":"One sentence impact.","impact":"HIGH","effect":"USD_BULLISH"}]}
+
+Include 4-5 events and 6-8 news items.`;
+}
+
+// ── SCAN ALL ───────────────────────────────────────────────────────────────────
+async function scanAll() {
+  if (scanning) return;
+  if (!apiKey) {
+    document.getElementById("apicard").style.display="block";
+    showTab("setup", document.querySelectorAll(".tab")[2]);
+    alert("Please enter your Claude API key in the Setup tab first.");
+    return;
+  }
+  scanning=true; sigs={};
+  setBusy(true); setStatus("amber","SCANNING");
+  document.getElementById("welcome").style.display="none";
+  document.getElementById("srow").style.display="flex";
+  updateStats(); renderLoading();
+
+  // Fetch news quietly in background
+  callClaude(newsPrompt(), NEWS_SYSTEM)
+    .then(r => { try { renderNews(extractJSON(r)); } catch(e) { console.log("News parse failed:", e.message); } })
+    .catch(e => console.log("News fetch failed:", e.message));
+
+  // Fetch all 8 pairs in parallel
+  await Promise.all(PAIRS.map(async (pair) => {
+    try {
+      const raw = await callClaude(signalPrompt(pair.symbol), SIGNAL_SYSTEM);
+      const sig = extractJSON(raw);
+      sigs[pair.symbol] = { ...sig, flag: pair.flag, ok: true };
+    } catch(e) {
+      sigs[pair.symbol] = { pair: pair.symbol, flag: pair.flag, ok: false, error: e.message };
+    }
+    updateStats();
+    renderCards();
+  }));
+
+  document.getElementById("lupd").textContent = "Updated " + new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
+  setBusy(false); setStatus("green","LIVE"); scanning=false;
+}
+
+function setBusy(b) {
+  const btn=document.getElementById("scanbtn");
+  if(b){btn.className="sbtn busy";btn.innerHTML='<div class="spin amber"></div> SCANNING…'}
+  else{btn.className="sbtn ready";btn.innerHTML='⚡ REFRESH SIGNALS'}
+}
+function setStatus(c,t){
+  const d=document.getElementById("sdot"),tx=document.getElementById("stxt");
+  d.className="dot"+(c!=="green"?" "+c:"");
+  tx.style.color=c==="green"?"var(--g)":c==="amber"?"var(--a)":"var(--r)";
+  tx.textContent=t;
+}
+function updateStats(){
+  const a=Object.values(sigs).filter(s=>s.ok);
+  document.getElementById("sbuy").textContent=a.filter(s=>s.signal==="BUY").length;
+  document.getElementById("ssell").textContent=a.filter(s=>s.signal==="SELL").length;
+  document.getElementById("sneut").textContent=a.filter(s=>s.signal==="NEUTRAL").length;
+}
+
+// ── RENDER ─────────────────────────────────────────────────────────────────────
+function renderLoading(){
+  document.getElementById("cards").innerHTML=PAIRS.map(p=>`
+    <div class="lcrd">
+      <div class="lhdr"><span style="font-size:22px">${p.flag}</span>
+      <div><div style="font-family:monospace;font-size:17px;font-weight:800;color:#f1f5f9">${p.symbol}</div>
+      <div class="lbar" style="width:80px;margin-top:4px"></div></div>
+      <div style="margin-left:auto"><div class="spin"></div></div></div>
+      <div class="lbars"><div class="lbar" style="width:100%"></div><div class="lbar" style="width:70%"></div><div class="lbar" style="width:55%"></div></div>
+    </div>`).join("");
+}
+
+function renderCards(){
+  const c=document.getElementById("cards");
+  c.innerHTML="";
+  const done=Object.values(sigs).filter(s=>s.ok);
+  const fails=PAIRS.filter(p=>sigs[p.symbol]?.ok===false);
+  if(fails.length){const b=document.createElement("div");b.className="errbanner";b.textContent=`⚠ ${fails.length} pair(s) failed — tap Refresh to retry`;c.appendChild(b)}
+  if(done.length){const b=document.createElement("div");b.className="infobanner";const act=done.filter(s=>s.signal!=="NEUTRAL").length;b.innerHTML=`<b>${act} actionable signal${act!==1?"s":""}</b> · ${done.length} pairs analysed · Tap BUY/SELL cards for full detail`;c.appendChild(b)}
+  PAIRS.forEach(pair=>{
+    const s=sigs[pair.symbol];
+    if(!s){c.innerHTML+=lcrd(pair)}
+    else if(!s.ok){c.innerHTML+=ecrd(pair,s.error)}
+    else{c.innerHTML+=scrd(s)}
+  });
+}
+
+function lcrd(p){return`<div class="lcrd"><div class="lhdr"><span style="font-size:22px">${p.flag}</span><div style="font-family:monospace;font-size:17px;font-weight:800;color:#f1f5f9">${p.symbol}</div><div style="margin-left:auto"><div class="spin"></div></div></div><div class="lbars"><div class="lbar" style="width:100%"></div><div class="lbar" style="width:70%"></div></div></div>`}
+function ecrd(p,e){return`<div class="card"><div class="prow"><span class="flag">${p.flag}</span><div><div class="pname">${p.symbol}</div></div></div><div class="errbanner" style="margin-top:10px">⚠ ${x(e?.slice(0,100)||"Error")}</div></div>`}
+
+function ring(v){
+  const col=v>=70?"#00e5b0":v>=60?"#f59e0b":"#64748b";
+  const r=22,ci=2*Math.PI*r,f=ci*Math.min(100,Math.max(0,v))/100;
+  return`<svg width="58" height="58" viewBox="0 0 58 58" style="flex-shrink:0"><circle cx="29" cy="29" r="${r}" fill="none" stroke="#1e293b" stroke-width="5"/><circle cx="29" cy="29" r="${r}" fill="none" stroke="${col}" stroke-width="5" stroke-dasharray="${f.toFixed(1)} ${(ci-f).toFixed(1)}" stroke-linecap="round" transform="rotate(-90 29 29)"/><text x="29" y="34" text-anchor="middle" fill="${col}" font-size="11" font-weight="800" font-family="monospace">${v}%</text></svg>`;
+}
+function br(label,v,color){return`<div class="brow"><div class="blrow"><span style="color:var(--mu);font-size:10px">${label}</span><span style="color:${color};font-family:monospace;font-weight:700;font-size:10px">${v}</span></div><div class="btrack"><div class="bfill" style="width:${v}%;background:${color}"></div></div></div>`}
+function ch(l,v,c){if(!v||v==="—")return"";return`<span class="chip"><span class="cl">${l} </span><span class="cv" style="color:${c}">${v}</span></span>`}
+function x(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+
+function scrd(s){
+  const sig=s.signal||"NEUTRAL";
+  const col=sig==="BUY"?"#00e5b0":sig==="SELL"?"#ff3d5a":"#64748b";
+  const cls=sig==="BUY"?"buy":sig==="SELL"?"sell":"";
+  const id=s.pair.replace("/","").toLowerCase();
+  const act=sig!=="NEUTRAL";
+  const cc=s.confidence==="HIGH"?"#00e5b0":s.confidence==="MEDIUM"?"#f59e0b":"#64748b";
+  const qrow=act?`<div class="qrow">${ch("ENTRY",s.entry,"#94a3b8")}${ch("SL",s.stopLoss,"#ff3d5a")}${ch("TP",s.takeProfit,"#00e5b0")}${ch("R:R",s.riskReward,"#f59e0b")}</div>`:`<div class="nbox">⏸ ${x(s.summary||"No high-probability setup. Wait for clearer conditions.")}</div>`;
+  const det=act?`<div class="detail" id="det-${id}">
+    <div class="scrow">${ring(s.probability||0)}<div class="bcol">${br("Technical",s.technicalScore||0,"#60a5fa")}${br("Fundamental",s.fundamentalScore||0,"#a78bfa")}${br("Sentiment",s.sentimentScore||0,"#f59e0b")}${br("News Impact",s.newsImpact||0,"#00e5b0")}</div></div>
+    <div class="pboxes"><div class="pbox"><div class="pbl">ENTRY</div><div class="pbv" style="color:#94a3b8">${s.entry||"—"}</div></div><div class="pbox"><div class="pbl">STOP LOSS</div><div class="pbv" style="color:#ff3d5a">${s.stopLoss||"—"}</div></div><div class="pbox"><div class="pbl">TAKE PROFIT</div><div class="pbv" style="color:#00e5b0">${s.takeProfit||"—"}</div></div></div>
+    <div class="crow">${ch("R:R",s.riskReward,"#f59e0b")}${ch("TF",s.timeframe,"#60a5fa")}${ch("TREND",s.trend,col)}${ch("SL",s.pips_sl?s.pips_sl+"p":null,"#ff3d5a")}${ch("TP",s.pips_tp?s.pips_tp+"p":null,"#00e5b0")}</div>
+    <div class="sectitle">KEY DRIVERS</div>${(s.drivers||[]).map(d=>`<div class="driver"><span class="ddot" style="color:${col}">◆</span>${x(d)}</div>`).join("")}
+    <div class="sectitle" style="margin-top:10px">NEWS FACTORS</div>${(s.news||[]).slice(0,3).map(n=>`<div class="nfrow"><span class="nftxt">${x(n.headline)}</span><span class="nfscore" style="color:${n.effect==="BULLISH"?"#00e5b0":n.effect==="BEARISH"?"#ff3d5a":"#94a3b8"}">${n.score}/10</span></div>`).join("")}
+    <div class="sumbox" style="background:${col}0b;border:1px solid ${col}22">${x(s.summary||"")}</div>
+    <div class="riskbox"><div class="sectitle" style="color:#ff3d5a55">RISKS</div>${(s.risks||[]).map(r=>`<div class="riskrow">⚠ ${x(r)}</div>`).join("")}</div>
+    <button class="collbtn" style="color:${col}80;border-color:${col}25" onclick="tog('${id}')">▲ Collapse</button>
+  </div>`:"";
+  return`<div class="card ${cls}">
+    <div class="chdr" onclick="${act?`tog('${id}')`:``}">
+      <div class="prow"><span class="flag">${s.flag||""}</span><div><div class="pname">${s.pair}</div><div class="pprice">${s.price||""}</div></div></div>
+      <div style="text-align:right"><span class="sbadge" style="color:${col};background:${col}18;border-color:${col}40">${sig}</span><div class="clbl" style="color:${cc}">${s.confidence||""} CONF</div>${act?`<span class="chev" id="chev-${id}">▼</span>`:""}</div>
+    </div>${qrow}${det}</div>`;
+}
+
+function tog(id){
+  const d=document.getElementById("det-"+id),c=document.getElementById("chev-"+id);
+  if(!d)return;
+  const open=d.classList.toggle("open");
+  if(c){c.textContent=open?"▲":"▼";c.classList.toggle("open",open)}
+}
+
+function renderNews(n){
+  if(!n)return;
+  const sc={RISK_ON:"#00e5b0",RISK_OFF:"#ff3d5a",MIXED:"#f59e0b"};
+  const ic={HIGH:"#ff3d5a",MEDIUM:"#f59e0b",LOW:"#64748b"};
+  const ec={"USD_BULLISH":"#60a5fa","USD_BEARISH":"#ff3d5a","EUR_BULLISH":"#60a5fa","EUR_BEARISH":"#ff3d5a","RISK_ON":"#00e5b0","RISK_OFF":"#ff3d5a","MIXED":"#f59e0b"};
+  const s=sc[n.sentiment]||"#f59e0b";
+  let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:10px;color:var(--di);letter-spacing:2px">MARKET OVERVIEW</span><span style="background:${s}20;color:${s};padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700">${(n.sentiment||"").replace("_"," ")}</span></div>`;
+  if(n.theme)h+=`<div class="ovtheme"><b>THIS WEEK: </b>${x(n.theme)}</div>`;
+  if(n.events?.length){
+    h+=`<div class="sectitle" style="margin-bottom:8px">KEY EVENTS</div>`;
+    n.events.forEach(e=>h+=`<div class="evrow"><span class="evday">${x(e.day)}</span><div><div class="evname">${x(e.event)}</div><div class="evpairs">${x(e.pairs)}</div></div><span class="evimp" style="color:${ic[e.impact]||"#64748b"}">${e.impact}</span></div>`);
+  }
+  if(n.news?.length){
+    h+=`<div class="sectitle" style="margin:12px 0 8px">NEWS DRIVERS</div>`;
+    n.news.forEach(i=>{
+      const icc=ic[i.impact]||"#64748b",ecc=ec[i.effect]||"#64748b";
+      h+=`<div class="ncrd" style="border-left-color:${icc}"><div class="nmeta"><span class="ncat">${x(i.category)}</span><span class="neff" style="color:${ecc}">${x((i.effect||"").replace("_"," "))}</span></div><div class="nhl">${x(i.headline)}</div>${i.detail?`<div class="ndetail">${x(i.detail)}</div>`:""}</div>`;
+    });
+  }
+  document.getElementById("newsbody").innerHTML=h;
+}
+</script>
+
+</body>
+</html>
